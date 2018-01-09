@@ -1,95 +1,137 @@
+let fs = require('fs');
 const http = require('http');
 const WebApp = require('./webapp');
-const fs = require('fs');
-const url = require('url');
-const PORT = 9999;
-let names = [];
-let name = '';
+const timeStamp = require('./time.js').timeStamp;
+let toS = o => JSON.stringify(o,null,2);
+const PORT = 9099;
+let registered_users =
+  [{userName:'madhurk',name:'Madhuri Kondekar'},
+  {userName:'aditiL',name:'Aditi Lahare'}];
 
-const getExtension = function(fileName) {
-  let extension = fileName.slice(fileName.lastIndexOf('.'));
-  return extension;
-}
+let logRequest = (req,res) => {
+  let text = ['------------------------------',
+    `${timeStamp()}`,
+    `${req.method} ${req.url}`,
+    `HEADERS=> ${toS(req.headers)}`,
+    `COOKIES=> ${toS(req.cookies)}`,
+    `BODY=> ${toS(req.body)}`,''].join('\n');
+  fs.appendFile('request.log',text,()=>{});
 
-const getContentType = function(extension) {
-  let contentType = {
-    ".html": "text/html",
-    ".css": "text/css",
-    ".jpeg": "image/jpeg",
-    ".jpg": "image/jpg",
-    ".pdf": "application/pdf",
-    ".gif": "image/gif"
-  }
-  return contentType[extension];
-}
-
-const doesFileExists = function(fileName) {
-  return fs.existsSync(fileName);
-}
-
-const updateGivenUrl = function(url) {
-  if (url == '/') {
-    return './public/index.html';
-  }
-  return `./public${url}`;
+  console.log(`${req.method} =====>${req.url}`);
 };
 
-const requestHandler = function(req, res) {
-  console.log(req.method);
-  if (req.url.startsWith('/guestBook.html?')){
-    let url = req.url;
-    names.unshift(getCommentWithDetails(url));
-    name = '';
-    let newUrl = getPathname(url);
-    if (newUrl == '/guestBook.html') {
-      res.write(fs.readFileSync('./public/guestBook.html'))
-      let list = names.map(function(name) {
-        return `<li>${name}`;
-      });
-      res.write(list.join(''));
-      return;
-    }
+let loadUser = (req,res) => {
+  let sessionid = req.cookies.sessionid;
+  let user = registered_users.find(u=>u.sessionid==sessionid);
+  if(sessionid && user){
+    req.user = user;
   }
-  let updatedUrl = updateGivenUrl(req.url);
-  if (doesFileExists(updatedUrl)) {
-    let extension = getExtension(updatedUrl);
-    let contentType = getContentType(extension);
-    res.statusCode = 200;
-    res.setHeader('Content-Type', contentType);
-    res.write(fs.readFileSync(updatedUrl));
-  } else {
-    res.statusCode = 404;
-    res.write(`Error:404 File Not Found`);
-  }
+};
+
+let redirectLoggedInUserToHome = (req,res) => {
+  if(req.urlIsOneOf(['/','/login']) && req.user) res.redirect('/home');
+};
+
+let redirectLoggedOutUserToLogin = (req,res) => {
+  if(req.urlIsOneOf(['/','/home','/logout']) && !req.user) res.redirect('/login');
+};
+
+let app = WebApp.create();
+app.use(logRequest);
+app.use(loadUser);
+
+app.get('/',(req,res) => {
+  res.setHeader('Content-type','text/html');
+  res.write(fs.readFileSync('./public/index.html'));
   res.end();
-  return;
-}
+});
 
-const getPathname = function(req){
-  let details = url.parse(req);
-  return details.pathname;
-};
+app.get('/index.html',(req,res) => {
+  res.setHeader('Content-type','text/html');
+  res.write(fs.readFileSync('./public/index.html'));
+  res.end();
+});
 
-const getDateAndTime = function(){
-  let date = new Date();
-  return date.toDateString() + '  ' + date.toLocaleTimeString();
-};
+app.get('/ageratum.html',(req,res) => {
+  res.setHeader('Content-type','text/html');
+  res.write(fs.readFileSync('./public/ageratum.html'));
+  res.end();
+});
 
-const getNameAndComment = function(req){
-  let str = url.parse(req);
-  str = str.query;
-  let commentor = str.split('&')[0].split('=')[1];
-  let comment = str.split('&')[1].split('=')[1];
-  return 'Name: ' + commentor + '__' + 'Comment: ' + comment;
-};
+app.get('/abeliophyllum.html',(req,res) => {
+  res.setHeader('Content-type','text/html');
+  res.write(fs.readFileSync('./public/abeliophyllum.html'));
+  res.end();
+});
 
-let getCommentWithDetails = function(url) {
-  let nameAndComment = getNameAndComment(url);
-  let dateAndTime = getDateAndTime();
-  return dateAndTime + '__' + nameAndComment;
-};
+app.get('/guestBook.html',(req,res) => {
+  res.setHeader('Content-type','text/html');
+  res.write(fs.readFileSync('./public' + req.url));
+  res.end();
+});
 
-const server = http.createServer(requestHandler);
-server.listen(PORT);
-console.log(`Listening at ${PORT}`);
-console.log("Homepage URL http://localhost:9099/index.html");
+app.get('/css/index.css',(req,res) => {
+  res.setHeader('Content-type','text/css');
+  res.write(fs.readFileSync('./public' + req.url));
+  res.end();
+});
+
+app.get('/css/ageratum.css',(req,res) => {
+  res.setHeader('Content-type','text/css');
+  res.write(fs.readFileSync('./public' + req.url));
+  res.end();
+});
+
+app.get('/css/abeliophyllum.css',(req,res) => {
+  res.setHeader('Content-type','text/css');
+  res.write(fs.readFileSync('./public' + req.url));
+  res.end();
+});
+
+app.get('/css/guestBook.css',(req,res) => {
+  res.setHeader('Content-type','text/css');
+  res.write(fs.readFileSync('./public/css/guestBook.css'));
+  res.end();
+});
+
+app.get('/img/abeliophyllum.jpg',(req,res) => {
+  res.setHeader('Content-type',"image/jpg");
+  res.write(fs.readFileSync('./public' + req.url));
+  res.end();
+});
+
+app.get('/img/ageratum.jpg',(req,res) => {
+  res.setHeader('Content-type',"image/jpg");
+  res.write(fs.readFileSync('./public' + req.url));
+  res.end();
+});
+
+app.get('/img/freshorigins.jpg',(req,res) => {
+  res.setHeader('Content-type',"image/jpg");
+  res.write(fs.readFileSync('./public' + req.url));
+  res.end();
+});
+
+app.get('/img/wateringJar.gif',(req,res) => {
+  res.setHeader('Content-type',"image/gif");
+  res.write(fs.readFileSync('./public' + req.url));
+  res.end();
+});
+
+app.get('/docs/abeliophyllum.pdf',(req,res) => {
+  res.setHeader('Content-type',"application/pdf");
+  res.write(fs.readFileSync('./public' + req.url));
+  res.end();
+});
+
+app.get('/docs/ageratum.pdf',(req,res) => {
+  res.setHeader('Content-type',"application/pdf");
+  res.write(fs.readFileSync('./public' + req.url));
+  res.end();
+});
+
+
+
+let server = http.createServer(app);
+server.on('error',e => console.error('**error**',e.message));
+server.listen(PORT,(e) => console.log(`server listening at ${PORT}`));
