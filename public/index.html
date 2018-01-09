@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <title>Flower Catalog Website</title>
+  </head>
+
+  <script type="text/javascript">
+  let hideJarGif = function(){
+    document.getElementById("wateringJar").style.visibility = "hidden";
+    setTimeout(function(){
+      document.getElementById("wateringJar").style.visibility = "visible"
+    },1000)
+  }
+  </script>
+
+  <body>
+    <link rel="stylesheet" href="css/index.css">
+    <p>Flower Catalog</p>
+    <hr/>
+
+    <div class="freshoriginsImage">
+      <img src="img/freshorigins.jpg" style="width:800px;height:550px;">
+    </div>
+
+    <div class="flowerPageLinks">
+      <ul>
+        <li><a href="abeliophyllum.html">Abeliophyllum</a></li>
+        <li><a href="ageratum.html">Ageratum</a></li>
+      </ul>
+    </div>
+
+    <div class="guestBookLink">
+      <a href="guestBook.html">Guest Book</a>
+    </div>
+
+    <div id="wateringJar">
+      <img src="img/wateringJar.gif" onclick="hideJarGif()">
+    </div>
+
+  </body>
+</html>

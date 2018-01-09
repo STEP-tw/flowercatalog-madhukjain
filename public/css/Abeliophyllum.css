@@ -1,0 +1,48 @@
+h2{
+  padding-top: 50px;
+  text-align: center;
+  color: orange;
+  margin-top: -20px;
+  font-size: 30px;
+}
+hr{
+  border-width: 1px;
+  border-color: black;
+  width:1200px;
+}
+
+.fullPage{
+  border: 1px solid white;
+  background-color: #ffee ;
+  margin-left: 40px;
+  margin-right: 40px;
+  height:700px;
+}
+
+.abeliophyllumImage{
+  padding:10px;
+  padding-top: 2px;
+}
+
+.abeliophyllumInfo{
+  border: 1px solid white;
+  margin-left: 520px;
+  margin-top: -400px;
+  font-size: 17px;
+  word-spacing: 1px;
+  line-height: 2px;
+}
+
+a{
+  color:blue;
+  padding-left: 500px;
+  padding-top: 100px;
+}
+h3{
+  padding-top: 0px;
+  margin-left: 40px;
+  margin-top: -50px;
+}
+h4{
+  margin-left: 20px;
+}

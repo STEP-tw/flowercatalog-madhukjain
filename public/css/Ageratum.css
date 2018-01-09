@@ -1,0 +1,31 @@
+.fullPage{
+  border: 1px solid white;
+  margin-left: 50px;
+  background-color: #ffee;
+  margin-right: 50px;
+}
+
+h1{
+  color: orange;
+  text-align: center;
+}
+h2{
+  color: blue;
+  margin-top: -55px;
+  padding-left: 540px;
+}
+hr{
+  width:1000px;
+}
+.agerantumInfo{
+  border: 1px solid white;
+  margin-left: 520px;
+  margin-top: -400px;
+  font-size: 17px;
+  word-spacing: 1px;
+  line-height: 2px;
+}
+
+h4{
+  margin-left: 530px;
+}
