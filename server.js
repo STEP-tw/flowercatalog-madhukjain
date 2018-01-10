@@ -4,9 +4,8 @@ const WebApp = require('./webapp');
 const timeStamp = require('./time.js').timeStamp;
 let toS = o => JSON.stringify(o,null,2);
 const PORT = 9099;
-let registered_users =
-  [{userName:'madhurk',name:'Madhuri Kondekar'},
-  {userName:'aditiL',name:'Aditi Lahare'}];
+let registered_users = [{userName:'madhuri'}]
+JSON.parse(fs.readFileSync('./data/comments.json','utf8'));
 
 let logRequest = (req,res) => {
   let text = ['------------------------------',
@@ -40,6 +39,32 @@ let app = WebApp.create();
 app.use(logRequest);
 app.use(loadUser);
 
+app.get('/login.html',(req,res) => {
+  res.setHeader('Content-type','text/html');
+  if(req.cookies.logInFailed) res.write('<p>Login Here</p>');
+  res.write(fs.readFileSync('./public' + req.url));
+  res.end();
+});
+
+
+app.post('/index.html',(req,res) => {
+  let user = registered_users.find(u => u.userName==req.body.userName);
+  if(!user) {
+    res.setHeader('Set-Cookie',`logInFailed=true`);
+    res.redirect('/login.html');
+    return;
+  }
+  let sessionid = new Date().getTime();
+  res.setHeader('Set-Cookie',`sessionid=${sessionid}`);
+  user.sessionid = sessionid;
+  res.redirect('/index.html');
+});
+
+app.get('/logout.html',(req,res) => {
+  res.setHeader('Set-Cookie',[`loginFailed=false; Expires= ${new Date(1).toUTCString()}`,`sessionid=0; Expires=${new Date(1).toUTCString()}`]);
+  res.redirect('/index.html');
+});
+
 app.get('/',(req,res) => {
   res.setHeader('Content-type','text/html');
   res.write(fs.readFileSync('./public/index.html'));
@@ -66,9 +91,11 @@ app.get('/abeliophyllum.html',(req,res) => {
 
 app.get('/guestBook.html',(req,res) => {
   res.setHeader('Content-type','text/html');
+  // res.write('<form method="POST"> <input name="userName"><br><input type="submit"></form>');
   res.write(fs.readFileSync('./public' + req.url));
   res.end();
 });
+
 
 app.get('/css/index.css',(req,res) => {
   res.setHeader('Content-type','text/css');
@@ -129,7 +156,6 @@ app.get('/docs/ageratum.pdf',(req,res) => {
   res.write(fs.readFileSync('./public' + req.url));
   res.end();
 });
-
 
 
 let server = http.createServer(app);
