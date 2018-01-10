@@ -34,6 +34,16 @@ let redirectLoggedOutUserToLogin = (req,res) => {
   if(req.urlIsOneOf(['/','/home','/logout']) && !req.user) res.redirect('/login');
 };
 
+const getDate = function(){
+  let date = new Date();
+  return date.toDateString();
+};
+
+const getTime = function(){
+  let time = new Date();
+  return time.toLocaleTimeString();
+};
+
 let app = WebApp.create();
 app.use(logRequest);
 app.use(loadUser);
@@ -59,12 +69,17 @@ app.post('/index.html',(req,res) => {
 });
 
 app.post('/another',(req,res) =>{
+  console.log(comment);
   comment.unshift(req.body);
   fs.writeFileSync('./data/comments.json',JSON.stringify(comment,null,2));
   res.setHeader('Content-type','text/html');
   res.write(fs.readFileSync('./public' + '/guestBook.html'));
   comment.forEach((name)=> {
-    res.write(`<h4>Name: ${name.name} Comment: ${name.Comment}</h4>`);
+    name.Date = getDate();
+    name.Time = getTime();
+    res.write(`<h4>Name: ${name.name}<br> Comment: ${name.Comment}<br>
+      Date: ${name.Date}<br>
+      Time: ${name.Time}</h4>`);
   });
   res.end();
 })
@@ -74,7 +89,11 @@ app.get('/guestBook.html',(req,res) => {
   res.setHeader('Content-type','text/html');
   res.write(fs.readFileSync('./public' + '/guestBook.html'));
   comment.forEach((name)=> {
-    res.write(`<h4>Name: ${name.name} Comment: ${name.Comment}</h4>`);
+    name.Date = getDate();
+    name.Time = getTime();
+    res.write(`<h4>Name: ${name.name}<br> Comment: ${name.Comment}<br>
+      Date: ${name.Date}<br>
+      Time: ${name.Time}</h4>`);
   });
   res.end();
 });
